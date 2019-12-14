@@ -54,7 +54,7 @@ def link_menu_cat(bot, update):
   query = update.callback_query
   bot.edit_message_text(chat_id=query.message.chat_id,
                         message_id=query.message.message_id,
-                        text=link_menu_message_cat(),
+                        text=translate(link_menu_message_cat()).text,
                         reply_markup=link_menu_keyboard_cat())
 
 def rrss_menu_cat(bot, update):
@@ -69,8 +69,7 @@ def rrss_menu_cat(bot, update):
 def sos_menu_cat(bot, update):
   query = update.callback_query
   bot.send_contact(chat_id=query.message.chat_id, phone_number= "112", first_name="Teléfono de emergencias")
-  update.message.reply_text(main_menu_message_cat(), #1r param: missatge 
-                            reply_markup=main_menu_keyboard_cat())
+  
 
 
 ############################ Keyboards #########################################
@@ -89,7 +88,7 @@ def link_menu_keyboard_cat():
   keyboard = [[InlineKeyboardButton(translate('Xarxes Socials').text + "📱", callback_data='rrss_menu_keyboard_cat')],
               [InlineKeyboardButton(translate('Associacions').text + "🚻", callback_data='main_menu_cat')],
               [InlineKeyboardButton(translate('Links d\'interès').text + "🌐", url = "https://www.share4rare.org/")],
-              [InlineKeyboardButton(translate('Llibre de la cigüeña añil').text+'📖', url="https://weeblebooks.com/es/educacion-emocional/la-ciguena-anil/")],
+              [InlineKeyboardButton(translate('Libro de la cigüeña añil').text+'📖', url="https://weeblebooks.com/es/educacion-emocional/la-ciguena-anil/")],
               [InlineKeyboardButton(translate('BACK').text + " 🔙", callback_data='main_menu_cat')]]
   return InlineKeyboardMarkup(keyboard)
 
@@ -103,11 +102,6 @@ def rrss_menu_keyboard_cat():
   return InlineKeyboardMarkup(keyboard)  
 
 
-
-def link_link_rrss():
-  bot.send_message(chat_id=chat_id, 
-                 text="*bold* _italic_ `fixed width font` [link](http://google.com).", 
-                 parse_mode=telegram.ParseMode.MARKDOWN)  
 
 
 #########################EXTRA#############################
@@ -142,6 +136,11 @@ def where(bot, update, user_data):
 """
 # and so on for every callback_data option
 
+malaltia=""
+def info(bot, update):
+  malaltia = update.message.text[6:]
+  print(malaltia)
+
 ############################# Messages #########################################
 def main_menu_message_cat():
   return "Hola! Benvingut a RareBot!\n Pots buscar Informació d\'enfermetats minoritàries, buscar Material, veure els Links d\'interès, fer  un Test de concienciació o fer Donatius!"
@@ -149,15 +148,12 @@ def main_menu_message_cat():
 def link_menu_message_cat():
   return "Escull què vols!"
 
-def second_menu_message():
-  return 'Choose the submenu in second menu:'
-
 def link_menu_message():
   return 'Aquí pots trobar diferents links d \'interès'
 
 
 def rrss_menu_message():
-  return 'Choose the submenu in second menu:'
+  return 'Xarxes socials... aquí en tens unes quantes!'
 
 ############################# Handlers #########################################
 
@@ -168,11 +164,11 @@ dispatcher = updater.dispatcher
 updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CallbackQueryHandler(main_menu_cat, pattern='main_menu_cat'))
 updater.dispatcher.add_handler(CallbackQueryHandler(link_menu_cat, pattern='link_menu_keyboard_cat'))
-updater.dispatcher.add_handler(CallbackQueryHandler(link_link_rrss, pattern='m4'))
 updater.dispatcher.add_handler(CallbackQueryHandler(rrss_menu_cat, pattern='rrss_menu_keyboard_cat'))
-updater.dispatcher.add_handler(CallbackQueryHandler(sos_menu_cat))
+updater.dispatcher.add_handler(CallbackQueryHandler(sos_menu_cat, pattern = 'sos_menu_cat'))
 updater.dispatcher.add_handler(MessageHandler(Filters.location, where, pass_user_data=True))
 updater.dispatcher.add_handler(CommandHandler("help", help))
+updater.dispatcher.add_handler(CommandHandler('info', info))
   
 
 updater.start_polling()
