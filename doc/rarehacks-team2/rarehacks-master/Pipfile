@@ -1,0 +1,24 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+numpy = "*"
+python-telegram-bot = "*"
+ipykernel = "*"
+pandas = "*"
+xgboost = "*"
+seaborn = "*"
+sklearn = "*"
+nltk = "*"
+wordcloud = "*"
+chatterbot = "*"
+chatterbot-corpus = "*"
+pyyaml = "==5.1"
+fuzzywuzzy = "*"
+
+[requires]
+python_version = "3.6"
