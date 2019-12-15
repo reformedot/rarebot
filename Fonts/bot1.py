@@ -183,6 +183,7 @@ def echo(bot, update):
   bot.send_message(chat_id=update.message.chat_id, text=translator.translate(update.message.text))
 
 def where(bot, update, user_data):
+    mapa = StaticMap(500, 500)
     global ciutats
     global linkk
     try:
