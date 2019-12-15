@@ -12,10 +12,63 @@ from telegram.ext import CommandHandler, CallbackQueryHandler,  MessageHandler, 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from staticmap import StaticMap, CircleMarker
 from googletrans import Translator
+from requests import get
+from bs4 import BeautifulSoup
 
 ############################### Bot ############################################
 
 translator = Translator() # Create object of Translator.
+base='https://www.orpha.net/consor/cgi-bin/'
+url = 'https://www.orpha.net/consor/cgi-bin/Clinics_ERN.php?lng=EN'
+response = get(url)    
+html_soup = BeautifulSoup(response.text, 'html.parser')
+
+
+center_containers = html_soup.find_all('div', class_ = 'ERN')
+first=center_containers[0]
+
+tipus=[]
+mal=[]
+i=0
+for tag in first.ul.find_all("li", recursive=True):     
+    if tag.a.has_attr('href'):
+        tipus.append(tag.a.text.lower())
+        ini=tag.a.text.find('-')
+        nom=tag.a.text[ini+2:]
+        mal.append('mal%s'%i)
+        exec('mal%s={}'%i)
+        eval('mal%s'%i)['link']=tag.a.attrs['href']
+        i+=1
+
+nums=[]
+def check(inf):
+    print(inf)
+    nums=[]
+    for i in tipus:
+        if inf in i:
+            nums.append(tipus.index(i))
+    i='mal'+nums[0]
+    url = base+eval(i)['link']
+    response1 = get(url)
+    html_soup1= BeautifulSoup(response1.text, 'html.parser') 
+    centers = html_soup1.find_all('div', class_ = 'activityLoc')
+    first1=centers[0]
+    for tag in first1.find_all("div", recursive=True):
+        if tag.strong!=None:
+             if tag.strong.text not in eval(i):
+                 eval(i)[tag.strong.text]=[]
+                 pais=tag.strong.text
+    if tag.p!=None:
+        city=tag.p.text
+    if tag.a!=None:
+        if [tag.a.attrs['href'],city] not in eval(i)[pais]:
+            eval(i)[pais].append([tag.a.attrs['href'],city])
+    print(inf)            
+    print(eval(i)[pais])
+    return (eval(i)[pais])    
+         
+
+
 
 
 language="EN"
@@ -33,13 +86,20 @@ def translate(text):
   elif language =='FR':
     translated = translator.translate(text, dest='fr')
     return translated
+  elif language =='EUS':
+    translated = translator.translate(text, dest='eu')
+    return translated
+  elif language =='GAL':
+    translated = translator.translate(text, dest='gl')
+    return translated  
+
 
 
 
 
 def start(bot, update):
-  update.message.reply_text(translate(main_menu_message_cat()).text, #1r param: missatge 
-                            reply_markup=main_menu_keyboard_cat())#2n param: botons 
+    bot.sendMessage(chat_id=update.message.chat_id, text=translate("Hi! Choose your language typing /idioma + (CAT, ES, FR, EN, EUS, GAL)").text)    
+
  
 
 
@@ -67,8 +127,9 @@ def rrss_menu_cat(bot, update):
 
 
 def sos_menu_cat(bot, update):
-  query = update.callback_query
-  bot.send_contact(chat_id=query.message.chat_id, phone_number= "112", first_name="Teléfono de emergencias")
+  print("hola")
+  bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)    
+  #bot.send_contact(chat_id=update.message.chat_id, phone_number= "112", first_name="Teléfono de emergencias")
   
 
 
@@ -80,7 +141,6 @@ def main_menu_keyboard_cat():
               [InlineKeyboardButton(translate("SOS").text+'📞', callback_data='sos_menu_cat')],
               [InlineKeyboardButton(translate("Test de concienciación").text+'📚', url='https://forms.gle/tDh1fiKBdpNjG2S67')],
               [InlineKeyboardButton(translate("Donatius").text+'🎉', url='https://www.ccma.cat/tv3/marato/es/2019/230/')]]
-              #[InlineKeyboardButton('BACK', callback_data='BACK_Keyboard_cat')]
   return InlineKeyboardMarkup(keyboard)
 
 
@@ -161,9 +221,12 @@ malaltia=""
 def info(bot, update):
   malaltia = update.message.text[6:]
   print(malaltia)
+  check(malaltia)
+  print(malaltia)
 
 def idioma(bot, update): 
     global language
+    language=""
     languageentrada = update.message.text[8:]
     if languageentrada == "ES":
       language = "ES"
@@ -181,10 +244,13 @@ def idioma(bot, update):
     elif languageentrada == "EN":
       language = "EN"
       bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
-    else :
-      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
+    else:
+      bot.sendMessage(chat_id=update.message.chat_id, text="Sorry, I don't speak your language!")
     update.message.reply_text(translate(main_menu_message_cat()).text, #1r param: missatge 
                             reply_markup=main_menu_keyboard_cat())()
+
+
+ 
 
 
 """ 
@@ -216,7 +282,7 @@ updater.dispatcher.add_handler(CommandHandler('start', start))
 updater.dispatcher.add_handler(CallbackQueryHandler(main_menu_cat, pattern='main_menu_cat'))
 updater.dispatcher.add_handler(CallbackQueryHandler(link_menu_cat, pattern='link_menu_keyboard_cat'))
 updater.dispatcher.add_handler(CallbackQueryHandler(rrss_menu_cat, pattern='rrss_menu_keyboard_cat'))
-updater.dispatcher.add_handler(CallbackQueryHandler(sos_menu_cat, pattern = 'sos_menu_cat'))
+updater.dispatcher.add_handler(CallbackQueryHandler(sos_menu_cat))
 updater.dispatcher.add_handler(MessageHandler(Filters.location, where, pass_user_data=True))
 updater.dispatcher.add_handler(CommandHandler("help", help))
 updater.dispatcher.add_handler(CommandHandler('info', info))
