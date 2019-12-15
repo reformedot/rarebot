@@ -78,8 +78,8 @@ def main_menu_keyboard_cat():
               [InlineKeyboardButton(translate("Recursos").text + "♿", callback_data='link_menu_keyboard_cat')],
               [InlineKeyboardButton(translate("Links d\'interès").text + "🌐", callback_data='link_menu_keyboard_cat')],
               [InlineKeyboardButton(translate("SOS").text+'📞', callback_data='sos_menu_cat')],
-              [InlineKeyboardButton(translate("Test de concienciación").text+'📚', callback_data='test_keyboard_cat')],
-              [InlineKeyboardButton(translate("Donatius").text+'🎉', callback_data='donatiu_keyboard_cat')]]
+              [InlineKeyboardButton(translate("Test de concienciación").text+'📚', url='https://forms.gle/tDh1fiKBdpNjG2S67')],
+              [InlineKeyboardButton(translate("Donatius").text+'🎉', url='https://www.ccma.cat/tv3/marato/es/2019/230/')]]
               #[InlineKeyboardButton('BACK', callback_data='BACK_Keyboard_cat')]
   return InlineKeyboardMarkup(keyboard)
 
@@ -101,7 +101,28 @@ def rrss_menu_keyboard_cat():
               [InlineKeyboardButton('BACK🔙', callback_data='link_menu_keyboard_cat')]]
   return InlineKeyboardMarkup(keyboard)  
 
-
+ 
+"""
+def language(bot, update):
+    languageentrada = update.message.text[6:]
+    if languageentrada == "ES":
+      language = "ES"
+      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "CAT":
+      language = "CAT"
+      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "FR":
+      language = "FR"
+      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "EUS":
+      language = "EUS"
+      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "EN":
+      language = "EN"
+      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
+    else :
+      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
+"""
 
 
 #########################EXTRA#############################
@@ -141,6 +162,36 @@ def info(bot, update):
   malaltia = update.message.text[6:]
   print(malaltia)
 
+def idioma(bot, update): 
+    global language
+    languageentrada = update.message.text[8:]
+    if languageentrada == "ES":
+      language = "ES"
+      print("123")
+      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)    
+    elif languageentrada == "CAT":
+      language = "CAT"
+      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "FR":
+      language = "FR"
+      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "EUS":
+      language = "EUS"
+      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
+    elif languageentrada == "EN":
+      language = "EN"
+      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
+    else :
+      bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)
+    update.message.reply_text(translate(main_menu_message_cat()).text, #1r param: missatge 
+                            reply_markup=main_menu_keyboard_cat())()
+
+
+""" 
+def info2(bot, update):
+  print("aquest si")
+"""
+
 ############################# Messages #########################################
 def main_menu_message_cat():
   return "Hola! Benvingut a RareBot!\n Pots buscar Informació d\'enfermetats minoritàries, buscar Material, veure els Links d\'interès, fer  un Test de concienciació o fer Donatius!"
@@ -169,6 +220,8 @@ updater.dispatcher.add_handler(CallbackQueryHandler(sos_menu_cat, pattern = 'sos
 updater.dispatcher.add_handler(MessageHandler(Filters.location, where, pass_user_data=True))
 updater.dispatcher.add_handler(CommandHandler("help", help))
 updater.dispatcher.add_handler(CommandHandler('info', info))
+#updater.dispatcher.add_handler(CommandHandler('language', language))
+updater.dispatcher.add_handler(CommandHandler('idioma', idioma))
   
 
 updater.start_polling()
