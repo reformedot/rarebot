@@ -14,6 +14,7 @@ from staticmap import StaticMap, CircleMarker
 from googletrans import Translator
 from requests import get
 from bs4 import BeautifulSoup
+from geopy.geocoders import Nominatim
 
 ############################### Bot ############################################
 
@@ -22,6 +23,9 @@ base='https://www.orpha.net/consor/cgi-bin/'
 url = 'https://www.orpha.net/consor/cgi-bin/Clinics_ERN.php?lng=EN'
 response = get(url)    
 html_soup = BeautifulSoup(response.text, 'html.parser')
+geolocator = Nominatim(user_agent="share4bot")
+
+mapa = StaticMap(500, 500)
 
 
 center_containers = html_soup.find_all('div', class_ = 'ERN')
@@ -41,16 +45,18 @@ for tag in first.ul.find_all("li", recursive=True):
         i+=1
 
 nums=[]
+ciutats=[]
 def check(inf):
-    print(inf)
+    global mapa
+    global ciutats
     nums=[]
     for i in tipus:
         if inf in i:
             nums.append(tipus.index(i))
-    i='mal'+nums[0]
+    i='mal'+str(nums[0])
     url = base+eval(i)['link']
     response1 = get(url)
-    html_soup1= BeautifulSoup(response1.text, 'html.parser') 
+    html_soup1= BeautifulSoup(response1.text, 'html.parser')
     centers = html_soup1.find_all('div', class_ = 'activityLoc')
     first1=centers[0]
     for tag in first1.find_all("div", recursive=True):
@@ -58,14 +64,17 @@ def check(inf):
              if tag.strong.text not in eval(i):
                  eval(i)[tag.strong.text]=[]
                  pais=tag.strong.text
-    if tag.p!=None:
-        city=tag.p.text
-    if tag.a!=None:
-        if [tag.a.attrs['href'],city] not in eval(i)[pais]:
-            eval(i)[pais].append([tag.a.attrs['href'],city])
-    print(inf)            
-    print(eval(i)[pais])
-    return (eval(i)[pais])    
+        if tag.p!=None:
+            city=tag.p.text
+        if tag.a!=None:
+            #if [tag.a.attrs['href'],city] not in eval(i)[pais]:
+            if city[:-1] not in eval(i)[pais]:
+                eval(i)[pais].append(city[:-1])
+                #eval(i)[pais].append([tag.a.attrs['href'],city])
+    ciutats=[]
+    for z in eval(i)['ESPAGNE']:
+        ciutats.append(z)
+
          
 
 
@@ -127,7 +136,6 @@ def rrss_menu_cat(bot, update):
 
 
 def sos_menu_cat(bot, update):
-  print("hola")
   bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)    
   #bot.send_contact(chat_id=update.message.chat_id, phone_number= "112", first_name="Teléfono de emergencias")
   
@@ -191,23 +199,24 @@ def echo(bot, update):
   print(update.message.text)
   bot.send_message(chat_id=update.message.chat_id, text=translator.translate(update.message.text))
 
-
-
 def where(bot, update, user_data):
+    global ciutats
     try:
         fitxer = "%d.png" % random.randint(1000000, 9999999)
         lat, lon = update.message.location.latitude, update.message.location.longitude
-        mapa = StaticMap(500, 500)
         mapa.add_marker(CircleMarker((lon, lat), 'blue', 10))
-        mapa.add_marker(CircleMarker((-3.7025600, 40.4165000), 'red', 10))
-        mapa.add_marker(CircleMarker((9.0000000, 51.0000000), 'red', 10))
+        for k in ciutats:
+            location = geolocator.geocode(k)
+            mapa.add_marker(CircleMarker((location.longitude,location.latitude), 'red', 10))
+        
         imatge = mapa.render()
         imatge.save(fitxer)
         bot.send_photo(chat_id=update.message.chat_id, photo=open(fitxer, 'rb'))
-        os.remove(fitxer)
     except Exception as e:
         print(e)
         bot.send_message(chat_id=update.message.chat_id, text='💣') 
+
+ 
 
 """
 def where(bot, update, user_data):
@@ -220,9 +229,8 @@ def where(bot, update, user_data):
 malaltia=""
 def info(bot, update):
   malaltia = update.message.text[6:]
-  print(malaltia)
   check(malaltia)
-  print(malaltia)
+
 
 def idioma(bot, update): 
     global language
@@ -283,12 +291,12 @@ updater.dispatcher.add_handler(CallbackQueryHandler(main_menu_cat, pattern='main
 updater.dispatcher.add_handler(CallbackQueryHandler(link_menu_cat, pattern='link_menu_keyboard_cat'))
 updater.dispatcher.add_handler(CallbackQueryHandler(rrss_menu_cat, pattern='rrss_menu_keyboard_cat'))
 updater.dispatcher.add_handler(CallbackQueryHandler(sos_menu_cat))
-updater.dispatcher.add_handler(MessageHandler(Filters.location, where, pass_user_data=True))
+#updater.dispatcher.add_handler(MessageHandler(Filters.location, where, pass_user_data=True))
 updater.dispatcher.add_handler(CommandHandler("help", help))
 updater.dispatcher.add_handler(CommandHandler('info', info))
 #updater.dispatcher.add_handler(CommandHandler('language', language))
 updater.dispatcher.add_handler(CommandHandler('idioma', idioma))
-  
+updater.dispatcher.add_handler(MessageHandler(Filters.location, where, pass_user_data=True))  
 
 updater.start_polling()
 ################################################################################
