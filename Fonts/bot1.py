@@ -52,6 +52,7 @@ def check(inf):
     global mapa
     global ciutats
     nums=[]
+    linkk=[]
     for i in tipus:
         if inf in i:
             nums.append(tipus.index(i))
@@ -87,6 +88,7 @@ def check(inf):
 language="EN"
 
 def translate(text):
+  global language
   if language == "ES":
     translated = translator.translate(text, dest='es')
     return translated
@@ -147,8 +149,7 @@ def sos_menu_cat(bot, update):
 
 ############################ Keyboards #########################################
 def main_menu_keyboard_cat():
-  keyboard = [[InlineKeyboardButton(translate("Informació").text + "🔍", callback_data='info_keyboard_cat')],
-              [InlineKeyboardButton(translate("Recursos").text + "♿", callback_data='link_menu_keyboard_cat')],
+  keyboard = [[InlineKeyboardButton(translate("Recursos").text + "♿", url='http://www.creenfermedadesraras.es/creer_01/recuasoc/recursos/index.htm')],
               [InlineKeyboardButton(translate("Links d\'interès").text + "🌐", callback_data='link_menu_keyboard_cat')],
               [InlineKeyboardButton(translate("Test de concienciación").text+'📚', url='https://forms.gle/tDh1fiKBdpNjG2S67')],
               [InlineKeyboardButton(translate("Donatius").text+'🎉', url='https://www.ccma.cat/tv3/marato/es/2019/230/')]]
@@ -157,10 +158,10 @@ def main_menu_keyboard_cat():
 
 def link_menu_keyboard_cat():
   keyboard = [[InlineKeyboardButton(translate('Xarxes Socials').text + "📱", callback_data='rrss_menu_keyboard_cat')],
-              [InlineKeyboardButton(translate('Associacions').text + "🚻", callback_data='main_menu_cat')],
+              [InlineKeyboardButton(translate('Associacions').text + "🚻", url='http://fecamm.org/portal1/m_index.asp?idioma=1')],
               [InlineKeyboardButton(translate('Links d\'interès').text + "🌐", url = "https://www.share4rare.org/")],
               [InlineKeyboardButton(translate('Libro de la cigüeña añil').text+'📖', url="https://weeblebooks.com/es/educacion-emocional/la-ciguena-anil/")],
-              [InlineKeyboardButton(translate('BACK').text + " 🔙", callback_data='main_menu_cat')]]
+              [InlineKeyboardButton('BACK 🔙', callback_data='main_menu_cat')]]
   return InlineKeyboardMarkup(keyboard)
 
 def rrss_menu_keyboard_cat():
@@ -173,27 +174,6 @@ def rrss_menu_keyboard_cat():
   return InlineKeyboardMarkup(keyboard)  
 
  
-"""
-def language(bot, update):
-    languageentrada = update.message.text[6:]
-    if languageentrada == "ES":
-      language = "ES"
-      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
-    elif languageentrada == "CAT":
-      language = "CAT"
-      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
-    elif languageentrada == "FR":
-      language = "FR"
-      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
-    elif languageentrada == "EUS":
-      language = "EUS"
-      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
-    elif languageentrada == "EN":
-      language = "EN"
-      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
-    else :
-      bot.sendMessage(chat_id=update.message.chat_id, text=Translate("Gracias! El idioma ha sido configurado correctamente").text)
-"""
 
 
 #########################EXTRA#############################
@@ -224,16 +204,11 @@ def where(bot, update, user_data):
 
  
 
-"""
-def where(bot, update, user_data):
-    lat, lon = update.message.location.latitude, update.message.location.longitude
-    print(lat, lon)
-    bot.send_message(chat_id=update.message.chat_id, text='Ets a les coordenades %f %f' % (lat, lon))   
-"""
-# and so on for every callback_data option
+
 
 malaltia=""
 def info(bot, update):
+  bot.send_message(chat_id=update.message.chat_id, text='D\'acord! Enviam la meva ubicació')
   malaltia = update.message.text[6:]
   check(malaltia)
 
@@ -244,7 +219,6 @@ def idioma(bot, update):
     languageentrada = update.message.text[8:]
     if languageentrada == "ES":
       language = "ES"
-      print("123")
       bot.sendMessage(chat_id=update.message.chat_id, text=translate("Gracias! El idioma ha sido configurado correctamente").text)    
     elif languageentrada == "CAT":
       language = "CAT"
@@ -274,7 +248,7 @@ def info2(bot, update):
 
 ############################# Messages #########################################
 def main_menu_message_cat():
-  return "Hola! Benvingut a RareBot!\n Pots buscar Informació d\'enfermetats minoritàries, buscar Material, veure els Links d\'interès, fer  un Test de concienciació o fer Donatius!"
+  return "Hola! Benvingut a RareBot!\nPots buscar Informació d\'enfermetats minoritàries, buscar Material, veure els Links d\'interès, fer  un Test de concienciació o fer Donatius!\nPots buscar informació de la malaltia escrivint /info + el nom de la malaltia!"
 
 def link_menu_message_cat():
   return "Escull què vols!"
