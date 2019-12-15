@@ -46,7 +46,9 @@ for tag in first.ul.find_all("li", recursive=True):
 
 nums=[]
 ciutats=[]
+linkk=[]
 def check(inf):
+    global linkk
     global mapa
     global ciutats
     nums=[]
@@ -70,10 +72,12 @@ def check(inf):
             #if [tag.a.attrs['href'],city] not in eval(i)[pais]:
             if city[:-1] not in eval(i)[pais]:
                 eval(i)[pais].append(city[:-1])
-                #eval(i)[pais].append([tag.a.attrs['href'],city])
+                if pais=='ESPAGNE':
+                    linkk.append(base+tag.a.attrs['href'])
     ciutats=[]
     for z in eval(i)['ESPAGNE']:
         ciutats.append(z)
+
 
          
 
@@ -146,7 +150,6 @@ def main_menu_keyboard_cat():
   keyboard = [[InlineKeyboardButton(translate("Informació").text + "🔍", callback_data='info_keyboard_cat')],
               [InlineKeyboardButton(translate("Recursos").text + "♿", callback_data='link_menu_keyboard_cat')],
               [InlineKeyboardButton(translate("Links d\'interès").text + "🌐", callback_data='link_menu_keyboard_cat')],
-              [InlineKeyboardButton(translate("SOS").text+'📞', callback_data='sos_menu_cat')],
               [InlineKeyboardButton(translate("Test de concienciación").text+'📚', url='https://forms.gle/tDh1fiKBdpNjG2S67')],
               [InlineKeyboardButton(translate("Donatius").text+'🎉', url='https://www.ccma.cat/tv3/marato/es/2019/230/')]]
   return InlineKeyboardMarkup(keyboard)
@@ -201,6 +204,7 @@ def echo(bot, update):
 
 def where(bot, update, user_data):
     global ciutats
+    global linkk
     try:
         fitxer = "%d.png" % random.randint(1000000, 9999999)
         lat, lon = update.message.location.latitude, update.message.location.longitude
@@ -212,6 +216,8 @@ def where(bot, update, user_data):
         imatge = mapa.render()
         imatge.save(fitxer)
         bot.send_photo(chat_id=update.message.chat_id, photo=open(fitxer, 'rb'))
+        for p in linkk:
+            bot.sendMessage(chat_id=update.message.chat_id, text=p)  
     except Exception as e:
         print(e)
         bot.send_message(chat_id=update.message.chat_id, text='💣') 
